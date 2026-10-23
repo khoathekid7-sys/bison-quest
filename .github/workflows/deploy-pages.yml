@@ -1,0 +1,93 @@
+# Builds Bison Quest and publishes it to GitHub Pages every time you push to `main`.
+# One-time setup (see DEPLOYING.md):
+#   1. Repo → Settings → Pages → Source: "GitHub Actions".
+#   2. Repo → Settings → Secrets and variables → Actions → Variables tab →
+#      New variable VERIFY_URL = your Cloudflare Worker address.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Shrink reference photos
+        run: node scripts/prepare-references.mjs
+
+      - name: Work out the site's base path
+        id: base
+        run: |
+          repo="${{ github.event.repository.name }}"
+          # A repo named <user>.github.io is served from the root; others from /<repo>.
+          if [[ "$repo" == *.github.io ]]; then echo "path=" >> "$GITHUB_OUTPUT"; else echo "path=/$repo" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Build static site
+        run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.base.outputs.path }}
+          NEXT_PUBLIC_VERIFY_URL: ${{ vars.VERIFY_URL }}
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Warn if the photo checker address is missing
+        if: ${{ vars.VERIFY_URL == '' }}
+        run: echo "::warning::VERIFY_URL is not set, so live photo checks will show 'not set up'. See DEPLOYING.md."
+
+      - run: touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Optional: also redeploy the photo checker, so it always uses the same
+  # coordinates as the app. Turn on by adding the repo variable
+  # DEPLOY_CHECKER = true and the secrets CLOUDFLARE_API_TOKEN and
+  # CLOUDFLARE_ACCOUNT_ID (see DEPLOYING.md, "Automatic checker updates").
+  deploy-checker:
+    if: ${{ vars.DEPLOY_CHECKER == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: "false"

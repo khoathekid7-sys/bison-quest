@@ -1,0 +1,21 @@
+// Cloudflare Worker settings for the Bison Quest photo checker.
+// Deploy with: npx wrangler deploy   (see DEPLOYING.md)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bison-quest-checker",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "vars": {
+    // EDIT THESE two lines after you know your GitHub Pages address.
+    // ALLOWED_ORIGINS: your site's origin (no path) plus local testing.
+    "ALLOWED_ORIGINS": "https://YOUR-GITHUB-USERNAME.github.io,http://localhost:3000",
+    // SITE_URL: the full address of the published app (used to load reference photos).
+    "SITE_URL": "https://YOUR-GITHUB-USERNAME.github.io/bison-quest",
+    "BISON_VISION_MODEL": "claude-opus-5-5",
+    "BISON_VISION_EFFORT": "medium"
+  }
+  // The API key is a SECRET, not a var. Set it with:
+  //   npx wrangler secret put ANTHROPIC_API_KEY
+}

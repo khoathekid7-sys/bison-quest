@@ -1,0 +1,193 @@
+@import "tailwindcss";
+@import "./components.css" layer(components);
+
+/* ---------------------------------------------------------------------------
+   Bison Quest design tokens
+   Bucknell-inspired navy + orange, cream cards, green map, luminous gems.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-navy-950: #071a33;
+  --color-navy-900: #0b2545;
+  --color-navy-800: #12315a;
+  --color-navy-700: #1a3f73;
+  --color-navy-500: #3a65a3;
+  --color-navy-200: #c9d6ea;
+
+  --color-orange-700: #a8520a;
+  --color-orange-600: #d9700f;
+  --color-orange-500: #f28c28;
+  --color-orange-300: #ffbd73;
+  --color-orange-100: #ffead2;
+
+  --color-cream-50: #fffaf1;
+  --color-cream-100: #fbf1df;
+  --color-cream-200: #f1e1c3;
+  --color-cream-300: #e3cc9f;
+
+  --color-grass-200: #d4efbd;
+  --color-grass-300: #bfe6a0;
+  --color-grass-500: #78b85a;
+  --color-grass-700: #3f7a2b;
+
+  --color-teal-400: #2ec4b6;
+  --color-teal-700: #13756c;
+
+  --color-ink: #10233f;
+  --color-ink-muted: #4a5a75;
+
+  --color-ok: #1d7a38;
+  --color-ok-bg: #e3f5e6;
+  --color-bad: #b3261e;
+  --color-bad-bg: #fde7e5;
+  --color-warn: #7a4f00;
+  --color-warn-bg: #fff1cc;
+
+  --font-display: var(--font-fredoka), "Trebuchet MS", system-ui, sans-serif;
+  --font-sans: var(--font-nunito), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-card: 1.5rem;
+  --shadow-float: 0 10px 30px -8px rgb(7 26 51 / 0.45), 0 2px 6px rgb(7 26 51 / 0.2);
+  --shadow-pop: 0 4px 0 0 rgb(7 26 51 / 0.35);
+
+  --animate-pulse-ring: pulse-ring 2.2s ease-out infinite;
+  --animate-bob: bob 2.6s ease-in-out infinite;
+  --animate-shine: shine 3.2s ease-in-out infinite;
+  --animate-pop-in: pop-in 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  --animate-rise-in: rise-in 380ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  --animate-spin-slow: spin 14s linear infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.6); opacity: 0.7; }
+  80%, 100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+@keyframes shine {
+  0%, 60%, 100% { opacity: 0; transform: translateX(-60%) rotate(20deg); }
+  75% { opacity: 0.85; transform: translateX(60%) rotate(20deg); }
+}
+@keyframes pop-in {
+  0% { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes rise-in {
+  0% { transform: translateY(24px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes burst {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; }
+}
+@keyframes fly-to-hud {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(var(--fly-x, 0), var(--fly-y, -40vh)) scale(0.25); opacity: 0.2; }
+}
+
+:root {
+  color-scheme: light;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--color-navy-900);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Full-viewport screens that follow mobile toolbar changes. */
+.screen {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+}
+.screen-scroll {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pt-safe { padding-top: max(var(--safe-top), 0.75rem); }
+.pb-safe { padding-bottom: max(var(--safe-bottom), 0.75rem); }
+.top-safe { top: max(var(--safe-top), 0.75rem); }
+.bottom-safe { bottom: max(var(--safe-bottom), 0.75rem); }
+
+/* ---------------------------------------------------------------------------
+   Leaflet: stylized game map
+   --------------------------------------------------------------------------- */
+.leaflet-container {
+  background: var(--color-grass-300) !important;
+  font-family: var(--font-sans) !important;
+}
+.leaflet-buildings-pane svg {
+  filter: drop-shadow(2px 5px 0 rgb(60 90 40 / 0.35));
+}
+.leaflet-control-attribution {
+  background: rgb(255 250 241 / 0.85) !important;
+  border-radius: 8px 0 0 0;
+  font-size: 10px !important;
+  color: var(--color-ink-muted) !important;
+}
+.leaflet-control-attribution a { color: var(--color-navy-700) !important; }
+.bq-marker { background: transparent; border: none; }
+
+/* Player marker */
+.player-dot {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-navy-700);
+  border: 4px solid #fff;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.35);
+}
+.player-ring {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgb(26 63 115 / 0.45);
+  animation: var(--animate-pulse-ring);
+}
+
+/* Floating gem marker */
+.gem-float { animation: var(--animate-bob); }
+.gem-shadow {
+  width: 30px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgb(20 50 20 / 0.28);
+  margin: 0 auto;
+}
+
+/* Grain-free vignette that adds depth at the top of the map. */
+.map-vignette {
+  background: linear-gradient(to bottom, rgb(7 26 51 / 0.35), transparent 22%, transparent 70%, rgb(7 26 51 / 0.18));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  .player-ring, .gem-float, .shine { animation: none !important; }
+}

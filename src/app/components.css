@@ -1,0 +1,46 @@
+/* Reusable Bison Quest components. Imported into the "components" cascade layer
+   by globals.css so Tailwind utilities can override them. */
+/* Chunky game button — 3D "pop" with a press state. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  letter-spacing: 0.01em;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 160ms ease;
+  box-shadow: var(--shadow-pop);
+  user-select: none;
+}
+.btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 0 rgb(7 26 51 / 0.35); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn:focus-visible, .focus-ring:focus-visible {
+  outline: 3px solid var(--color-orange-300);
+  outline-offset: 3px;
+}
+.btn-primary { background: var(--color-orange-500); color: var(--color-navy-950); }
+.btn-primary:hover:not(:disabled) { background: #f79a3c; }
+.btn-navy { background: var(--color-navy-800); color: #fff; }
+.btn-navy:hover:not(:disabled) { background: var(--color-navy-700); }
+.btn-cream { background: var(--color-cream-50); color: var(--color-navy-900); box-shadow: 0 3px 0 0 var(--color-cream-300); border: 2px solid var(--color-cream-200); }
+.btn-ghost { background: transparent; color: inherit; box-shadow: none; text-decoration: underline; text-underline-offset: 3px; }
+.btn-danger { background: var(--color-bad); color: #fff; }
+
+.card {
+  background: var(--color-cream-50);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-float);
+}
+
+.font-display { font-family: var(--font-display); }
+
+/* Demo Mode stripe so it can never be mistaken for live play. */
+.demo-stripes {
+  background: repeating-linear-gradient(-45deg, #ffd23f 0 14px, #1b1b1b 14px 28px);
+}
